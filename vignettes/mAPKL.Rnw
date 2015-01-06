@@ -1,0 +1,297 @@
+% \VignetteIndexEntry{mAPKL Tutorial}
+% \VignetteKeywords{Microarray feature selection}
+% \VignettePackage{mAPKL}
+% \VignetteEngine{knitr::knitr}
+
+\documentclass[12pt]{article}
+
+<<style-knitr, eval=TRUE, echo=FALSE, results="asis">>=
+BiocStyle::latex()
+@
+
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+
+\begin{document}
+
+<<setup, include=FALSE>>=
+library(knitr)
+@ 
+
+\title{Bioconductor mAPKL Package}
+\author{Argiris Sakellariou$^{1,2}$\\[1cm]
+\small{$^1$ Biomedical Informatics Unit, Biomedical Research Foundation of the 
+Academy of Athens, Athens, Greece}\\[0cm]
+\small{$^2$ Department of Informatics and Telecommunications, National and 
+Kapodistrian Univ. of Athens, Athens, Greece}\\[0cm]
+\texttt{\small{a.sakellariou@gonkhosp.gr}}
+}
+
+\maketitle
+\pagenumbering{roman}
+
+\renewcommand{\baselinestretch}{1.2}
+\tableofcontents
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\section{Introduction}
+\noindent The mAPKL bioconductor R package implements a hybrid gene selection 
+method, which is based on the hypothesis that among the statistically 
+significant genes in a ranked list, there should be clusters of genes that share
+similar biological functions related to the investigated disease.Thus, instead 
+of keeping a number of $N$ top ranked genes, it would be more appropriate to 
+define and keep a number of gene cluster exemplars. 
+
+\noindent The proposed methodology combines filtering and cluster analysis to 
+select a small  yet highly discriminatory set of non-redundant genes. Regarding 
+the filtering step, a multiple hypothesis testing approach from \emph{multtest} 
+r-package (maxT) is employed to rank the genes of the training set according to 
+their differential expression.Then the top N genes (e.g. N = 200) are reserved 
+for cluster analysis. First the index of Krzanowski and Lai as included in the 
+\emph{ClusterSim} r-package is applied on the disease samples of the training 
+set to determine the number of clusters. The Krzanowski and Lai index is defined 
+by $DIFF(k)=(k-1)^\frac{2}{p}W_{k-1}-k^\frac{2}{p}W_{k}$ when choosing the 
+number of clusters $(k)$ to maximize the 
+quantity $KL(k)=\Big|\frac{DIFF(k)}{DIFF_(k+1)}\Big|$.
+The $W_k$ denotes the within-cluster sum of squared errors. 
+
+\noindent Finally, cluster analysis is performed with the aid of Affinity 
+Propagation (AP) clustering algorithm, which detects $n (n=k$ the Krzanowski 
+and Lai index) clusters among the top $N$ genes, the so called exemplars.Those 
+$n$ exemplars are expected to form a classifier that shall discriminate between 
+normal and disease samples (Sakellariou et al. 2012, \emph{BMC Bioinformatics} 
+\textbf{13}:270).
+\noindent This package implements the pre-mentioned methodology through a core 
+function, the \emph{mAPKL}. In the upcoming sections follows a guidance of the 
+included functions and its functionality through differential expression 
+analysis scenarios on a breast cancer dataset (GSE5764) which is part of the 
+\emph{mAPKLData} package.
+
+\section{Identification of deferentially expressed genes}
+\subsection{Breast cancer data}
+\noindent Throught this tutorial we utilized a publicly available breast cancer 
+dataset comprised of 30 samples, where 20 of them represent normal cases and the 
+remaining 10 samples  stand for tumor cases. We first load the package and then 
+the breast cancer data. Then with the aid of the \emph{sampling} function we  
+create a separate training and validation sets where 60\% of the samples will 
+be used for training and the rest 40\% of the samples will 
+be used for evaluation purposes.
+
+<<results='hide',message=FALSE>>=
+library(mAPKL)
+library(mAPKLData)
+data(mAPKLData)
+varLabels(mAPKLData)
+breast <- sampling(Data=mAPKLData, valPercent=40, classLabels="type", seed=135)
+@
+
+\noindent The \emph{sampling} function returns an S3 class (breast) with two 
+eSet class objects that nest the relevant training and validation sampes. Those 
+two objects are used throughout the rest of the analysis.
+
+<<tidy=TRUE>>=
+breast
+@
+
+\subsection{Data normalization and transformation}
+\noindent We perform normalization to the expression values through the 
+\emph{preprocess} function.
+
+<<tidy=TRUE,results='hide',message=FALSE>>=
+normTrainData <- preprocess(breast$trainData)
+normTestData <- preprocess(breast$testData)
+@
+
+\noindent The \emph{preprocess} function produces a list of several available 
+normalization and transformation options. Besides density plots per method are 
+produced and saved to current working directory to assist the user to decide 
+upon which method to select before proceeding to mAPKL analysis.
+
+<<tidy=TRUE>>=
+attributes(normTrainData)
+@
+
+\noindent The following graph presents the density plots of 8 possible 
+normalization process with or without log2 transformation. The \emph{preprocess} 
+function applies all of them and it is up to the user, which one will engage for 
+the rest of the analysis. In brief, the available approaches are mean-centering, 
+z-score, quantile, and cyclic loess. 
+During this case study we will proceed with the expression values folowing log2 
+transformation and cyclic loess normalization.
+
+\begin{figure}[]
+\centering
+\includegraphics[width=15cm,height=15cm,keepaspectratio]{../man/figures/density_train}
+\caption{Density plots of normalized intensity values}
+\end{figure}
+
+\subsection{mAPKL gene selection}
+\noindent In this example we employ the expresion values of log2 transformation 
+and cyclic loess normalization to proceed with the \emph{mAPKL} analysis.
+
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60)>>=
+exprs(breast$trainData)<-normTrainData$clL2.normdata
+exprs(breast$testData)<-normTestData$clL2.normdata
+out.clL2 <- mAPKL(trObj=breast$trainData, classLabels="type", 
+valObj=breast$testData,dataType=7)
+@
+
+\subsection{Building and evaluating classification models}
+\noindent  After having get the exemplars from \emph{mAPKL} analysis we build an 
+SVM classifier to test their discriminatory performance. Regarding the SVM 
+setup, we utilize a linear kernel for which the cost attribute is infered by the 
+tune.svm function. however, the user may freely use another kernel and a 
+different Cross Validation approach than 5-folds.
+
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60)>>=
+clasPred <- classification(out.clL2@exemplTrain,"type",out.clL2@exemplTest)
+@
+
+\noindent  The output of the \emph{classification} inform us about the SVM set 
+up, the number of Support Vectors and finally show the the predicted labels 
+along with the initial. In this example there is a validation set different from 
+the training set and therefore we may use the respective labels to obtain the 
+performance characteristcs. The relevant function \emph{metrics} called inside 
+the \emph{classification} function, calculates five key meassures: the Area 
+Under the ROC curve AUC, the classification accuracy, the Matthews correlation 
+coefficient MCC classification meassure, the degree of true negative's 
+identification Specificity, and finally the degree of true positive's 
+identification Sensitivity.
+
+\section{Advanced usage of the package}
+\subsection{Annotation analysis}
+\noindent  For each contemporary chip technology, there is a relevant annotation 
+file, in which the the user may drag several \emph{genome oriented} information. 
+Regarding the breast cancer microarray data, the gene expression values were 
+stored on Affumetrix gene chips. Using the \emph{annotate} function, the user 
+may obtain several info related to probe id, gene symbol, Entrez id, ensembl id, 
+and chromosomal location.
+
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60),message=FALSE>>=
+gene.info <- annotate(out.clL2@exemplars,"hgu133plus2.db")
+gene.info@results
+@
+
+\noindent  We may exploit the output of the \emph{annotate} function to extent 
+our analysis. For instance, we may perform \emph{pathway analysis} on the 
+exemplars. For this purpose we will utilize the \emph{reactome.db} package.
+
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60),message=FALSE>>=
+library("reactome.db")
+# We first remove the "NA" entries
+genes<-gene.info@entrezId[!is.na(gene.info@entrezId)]
+# Then we map the Entrez ID to Reactome pathway identifiers 
+qExtID2PathID <- mget(genes, reactomeEXTID2PATHID, ifnotfound=NA)
+notNA.idx <- unlist(lapply(qExtID2PathID, function(i) !all(is.na(i))))
+qExtID2PathID <- qExtID2PathID[notNA.idx]
+pathID <- as.character(qExtID2PathID[[1]])
+# Finally we map Reactome pathway identifiers to pathway names
+pathName <- unlist(mget(pathID, reactomePATHID2NAME))
+pathName
+@
+
+\subsection{Network characteristics}
+\noindent  Regarding the network charcteristics, we compute through the 
+\emph{netwAttr} function three different types of centralities 
+(degree, closeness, betweenness) and a meassure for clustering coefficient 
+called transitivity. The degree centrality of a node refer to the number of 
+connections or edges of that node to other nodes.The closeness centrality 
+describes the reciprocal accumulated shortest length distance from a node to all 
+other connected nodes.The betweeness centrality depicts the number of times a 
+node intervenes along the shortest path of two other nodes. Transitivity 
+meassures the degree of nodes to create clusters within a network.For all four 
+network meassures we provide both global and local values. Furthermore, we 
+compose an edge list (Node1-Node2-weight) based on the \emph{N} top ranked genes.
+\noindent  We may exploit that meassures to depict the exemplars' network 
+characteristics
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60),message=FALSE>>=
+net.attr <- netwAttr(out.clL2)
+wDegreeL <- net.attr@degree$WdegreeL[out.clL2@exemplars]
+wClosenessL <- net.attr@closeness$WclosenessL[out.clL2@exemplars]
+wBetweenessL <- net.attr@betweenness$WbetweennessL[out.clL2@exemplars]
+wTransitivityL <- net.attr@transitivity$WtransitivityL[out.clL2@exemplars]
+@
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60)>>=
+Global.val <- c(net.attr@degree$WdegreeG, net.attr@closeness$WclosenessG, 
+net.attr@betweenness$WbetweennessG, net.attr@transitivity$WtransitivityG)
+@
+<<tidy=TRUE>>=
+Global.val <- round(Global.val,2)
+exempl.netattr <- rbind(wDegreeL,wClosenessL,wBetweenessL,wTransitivityL)
+@
+<<tidy=TRUE>>=
+netAttr <- cbind(Global.val,exempl.netattr)
+netAttr <- t(netAttr)
+netAttr
+@
+
+\noindent and identify potential hubs.
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60),message=FALSE>>=
+# For local degree > global + standard deviation
+sdev<-sd(net.attr@degree$WdegreeL)
+msd <- net.attr@degree$WdegreeG + sdev
+hubs <- wDegreeL[which(wDegreeL > msd)]
+hubs
+@
+
+\noindent Finally, we may plot the network for those nodes that their local 
+weighted degree is greater than Global weithed degree plus 2 times the standard 
+deviation. We set  this rule for both significance and illustartion purposes 
+(that edge list has dimension 604 x 3).
+\vfill
+\begin{figure}[]
+\centering
+\includegraphics[width=15cm,height=15cm,keepaspectratio]{../man/figures/network}
+\caption{Degree centrality network}
+\end{figure}
+
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60),message=FALSE>>=
+sdev<-sd(net.attr@degree$WdegreeL)
+ms2d <- net.attr@degree$WdegreeG + 2*sdev
+net <- net.attr@degree$WdegreeL[which(net.attr@degree$WdegreeL > ms2d)]
+idx <- which(net.attr@edgelist[,1] %in% names(net))
+new.edgeList <- net.attr@edgelist[idx,]
+dim(new.edgeList)
+require(igraph)
+g=graph.data.frame(new.edgeList,directed=FALSE)
+#tkplot(g,layout=layout.fruchterman.reingold)
+@
+\vfill
+\section{Reporting}
+\noindent The overall analysis is summarized in an \textbf{html} report produced 
+by the \emph{report} function. It covers the dataset repsresentation depicting 
+the samples' names and their respective class labels, the exemplars section 
+where statistical results and network characteristcs are included. The 
+classification performance section illustrates the performance metrics achieved 
+in either cross-validation or hold-out validation.Finally, several annotation 
+info are presented if an annotation analysis has occured.
+
+\section{Session info}
+<<tidy=TRUE,tidy.opts=list(width.cutoff=60)>>=
+sessionInfo()
+@
+
+\section{Reference}
+\begin{list}{}{\itemindent=-1.0cm}
+
+\item Sakellariou, A., D. Sanoudou, and G. Spyrou. "Combining Multiple 
+Hypothesis Testing and Affinity Propagation Clustering Leads to Accurate, 
+Robust and Sample Size Independent Classification on Gene Expression Data.
+" BMC Bioinformatics 13 (2012): 270.
+\item http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE5764
+
+\end{list}
+
+\begin{figure}
+\centering
+\includegraphics[width=16cm,height=25cm,keepaspectratio]{../man/figures/report}
+\caption{mAPKL analysis report}
+\end{figure}
+
+\end{document}
