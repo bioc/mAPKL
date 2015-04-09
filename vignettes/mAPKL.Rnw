@@ -187,12 +187,13 @@ library("reactome.db")
 # We first remove the "NA" entries
 genes<-gene.info@entrezId[!is.na(gene.info@entrezId)]
 # Then we map the Entrez ID to Reactome pathway identifiers 
-qExtID2PathID <- mget(genes, reactomeEXTID2PATHID, ifnotfound=NA)
+qExtID2PathID <- mapIds(reactome.db, genes, 'PATHID', 'ENTREZID', 
+                        multiVals='list')
 notNA.idx <- unlist(lapply(qExtID2PathID, function(i) !all(is.na(i))))
 qExtID2PathID <- qExtID2PathID[notNA.idx]
 pathID <- as.character(qExtID2PathID[[1]])
 # Finally we map Reactome pathway identifiers to pathway names
-pathName <- unlist(mget(pathID, reactomePATHID2NAME))
+pathName <- mapIds(reactome.db, pathID,'PATHNAME','PATHID') 
 pathName
 @
 
