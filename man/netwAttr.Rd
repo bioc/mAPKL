@@ -8,19 +8,27 @@
     Calculate some basic network characteristics of the top ranked genes
 }
 \usage{
-    netwAttr(mAPKLObj)
+    netwAttr(mAPKLObj, net="clr")
 }
 
 \arguments{
     \item{mAPKLObj}{
     An object of mAPKL class. %%\code{mAPKLObj}
+    }    
+    \item{net}{
+    The network reconstruction method to be employed. The user may select 
+    between "clr" (default), "aracne.a" and "aracne.m". %%\code{net}
     }
 }
 \details{
 It calculates some basic network characteristics. Those include the "degree",
 the "closeness", the "betweenness", and finally the "transitivity" or else
 clustering coefficient. We calculate the weighted values for both local and
-global scores.
+global scores. \cr
+The three available network reconstruction options are: \cr
+clr: Context Likelihood or Relatedness Network \cr
+aracne.a: Algorithm for the Reconstruction of Accurate Cellular Networks (additive model) \cr
+aracne.m: Algorithm for the Reconstruction of Accurate Cellular Networks (multiplicative model) \cr
 }
 
 \value{

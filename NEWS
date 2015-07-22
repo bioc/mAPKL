@@ -1,5 +1,9 @@
 Change history of package mAPKL:
 ====================================
 
-Version 0.99.01:
-- "public release" later
+Version 1.0.1:
+- A new function, the "probes2pathways" has been added.
+- I have added to more network reconstruction approaches. The "aracne.a" and 
+  the "aracne.m" as included in the "parmigene" r-package.
+- I have replaced in the "preprocess" function the type of the produced image from 
+  jpeg to tiff format, with resolution=300dpi.

@@ -28,7 +28,7 @@ library(knitr)
 Academy of Athens, Athens, Greece}\\[0cm]
 \small{$^2$ Department of Informatics and Telecommunications, National and 
 Kapodistrian Univ. of Athens, Athens, Greece}\\[0cm]
-\texttt{\small{a.sakellariou@gonkhosp.gr}}
+\texttt{\small{argisake@gmail.com}}
 }
 
 \maketitle
@@ -180,21 +180,10 @@ gene.info@results
 
 \noindent  We may exploit the output of the \emph{annotate} function to extent 
 our analysis. For instance, we may perform \emph{pathway analysis} on the 
-exemplars. For this purpose we will utilize the \emph{reactome.db} package.
+exemplars. For this purpose we will utilize the \emph{probes2pathways} function that utilizes the \emph{reactome.db} package.This function employs the probe ids to identify the relevant pathways.
 
 <<tidy=TRUE,tidy.opts=list(width.cutoff=60),message=FALSE>>=
-library("reactome.db")
-# We first remove the "NA" entries
-genes<-gene.info@entrezId[!is.na(gene.info@entrezId)]
-# Then we map the Entrez ID to Reactome pathway identifiers 
-qExtID2PathID <- mapIds(reactome.db, genes, 'PATHID', 'ENTREZID', 
-                        multiVals='list')
-notNA.idx <- unlist(lapply(qExtID2PathID, function(i) !all(is.na(i))))
-qExtID2PathID <- qExtID2PathID[notNA.idx]
-pathID <- as.character(qExtID2PathID[[1]])
-# Finally we map Reactome pathway identifiers to pathway names
-pathName <- mapIds(reactome.db, pathID,'PATHNAME','PATHID') 
-pathName
+probes2pathways(gene.info)
 @
 
 \subsection{Network characteristics}
@@ -232,7 +221,7 @@ netAttr <- t(netAttr)
 netAttr
 @
 
-\noindent and identify potential hubs.
+\noindent and identify potential hubs.The calculations of this example are based on the "clr" network reconstruction method. However, there are for the time being two more options, including the "aracne.a" and "aracne.m".
 <<tidy=TRUE,tidy.opts=list(width.cutoff=60),message=FALSE>>=
 # For local degree > global + standard deviation
 sdev<-sd(net.attr@degree$WdegreeL)

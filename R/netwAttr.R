@@ -1,22 +1,32 @@
 netwAttr <-
-function(mAPKLObj) {
+function(mAPKLObj, net="clr") {
 
     netObj <- new("NetAttr")
+    
 
     mi <- knnmi.all(mAPKLObj@rankedIntens)
-    grn.clr <- clr(mi)
-
-    graph.clr <- graph.adjacency(grn.clr, weighted=TRUE)
-    edgelist <- get.edgelist(graph.clr)
+    
+    if(net=="aracne.a")
+        grn.net <- aracne.a(mi,0.05)
+      
+    else if(net=="aracne.m")
+        grn.net <- aracne.m(mi,0.15)
+      
+    else
+        grn.net <- clr(mi)
+      
+      
+    graph.net <- graph.adjacency(grn.net, weighted=TRUE)
+    edgelist <- get.edgelist(graph.net)
     edgelist <- cbind(edgelist, rep(0, length(edgelist[,1])))
-    edgelist[,3] <- E(graph.clr)$weight   ## This object is an output
+    edgelist[,3] <- E(graph.net)$weight   ## This object is an output
     colnames(edgelist) <- c("#Node1", "Node2", "Weight")
     netObj@edgelist <- edgelist
 
-    DegreeLocal <- degree(graph.clr)
+    DegreeLocal <- degree(graph.net)
     DegreeGlobal <- mean(DegreeLocal)
     ## weighted degree
-    WDegreeLocal <- graph.strength(graph.clr, weights=edgelist[,3])
+    WDegreeLocal <- graph.strength(graph.net, weights=edgelist[,3])
     WDegreeGlobal <- mean(WDegreeLocal)
 
     netObj@degree <- list(
@@ -26,7 +36,7 @@ function(mAPKLObj) {
             WdegreeG = WDegreeGlobal
             )
 
-    WClosenessLocal <- closeness(graph.clr, weights=edgelist[,3])
+    WClosenessLocal <- closeness(graph.net, weights=edgelist[,3])
     WClosenessGlobal <- mean(WClosenessLocal)
 
     netObj@closeness <- list(
@@ -34,7 +44,7 @@ function(mAPKLObj) {
             WclosenessG = WClosenessGlobal
             )
 
-    WBetweennessLocal <- betweenness(graph.clr, weights=edgelist[,3])
+    WBetweennessLocal <- betweenness(graph.net, weights=edgelist[,3])
     WBetweennessGlobal <- mean(WBetweennessLocal)
 
     netObj@betweenness <- list(
@@ -42,10 +52,10 @@ function(mAPKLObj) {
             WbetweennessG = WBetweennessGlobal
             )
 
-    WClusteringCoefLocal <- transitivity(graph.clr, type="local", 
+    WClusteringCoefLocal <- transitivity(graph.net, type="local", 
     weights=edgelist[,3])
     
-    WClusteringCoefGlobal <- transitivity(graph.clr, type="global", 
+    WClusteringCoefGlobal <- transitivity(graph.net, type="global", 
     weights=edgelist[,3])
 
     netObj@transitivity <- list(
