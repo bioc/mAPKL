@@ -16,3 +16,11 @@ importFrom("igraph", "graph.adjacency", "get.edgelist", "E", "degree", "graph.st
 
 exportClasses("mAPKLRes", "DataLD", "Classify","Annot","NetAttr")
 exportPattern("^[[:alpha:]]+")
+
+importFrom("grDevices", "dev.off", "jpeg")
+
+importFrom("graphics", "par")
+
+importFrom("stats", "density", "predict")
+
+importFrom("utils", "read.delim")
