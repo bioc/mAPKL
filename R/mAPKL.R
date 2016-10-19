@@ -13,13 +13,14 @@ bimaxit=50, r=2) {
     initCls <- pData(trObj)[,classLabels]
     idx2 <- order(pData(trObj)[classLabels], decreasing="FALSE")
     ordCls <- pData(trObj)[,classLabels] [idx2]
+    ordTrExprs <- exprs(trObj) [,idx2]
+    ordPhenoTr <- phenoData(trObj)[idx2]
     
     if(identical(initCls, ordCls)) {
         Data <- trObj
     }
     else {
-        ordTrExprs <- exprs(trObj) [,idx2]
-        ordPhenoTr <- phenoData(trObj)[idx2]
+        
         Data <- ExpressionSet(assayData=ordTrExprs, phenoData=ordPhenoTr,
         experimentData=experimentData(trObj), annotation=annotation(trObj))
 
@@ -105,17 +106,22 @@ bimaxit=50, r=2) {
         
         mAPKLObj@fc <- fc
     }
-
+    apData <- ExpressionSet(assayData=ordIntensities_f[exemplIndex,], phenoData=ordPhenoTr,
+        experimentData=experimentData(trObj), annotation=annotation(trObj))
     mAPKLObj@rankedIntens <- ordIntensities_f[,start:end]
-    exprs(Data) <- ordIntensities_f[exemplIndex,]
-    mAPKLObj@exemplTrain <- Data
+    # exprs(Data) <- ordIntensities_f[exemplIndex,]
+    mAPKLObj@exemplTrain <- apData
 
 
     if(!is.null(valObj)) {
-
+    
+        idx3 <- order(pData(valObj)[classLabels], decreasing="FALSE")
+        ordPhenoTst <- phenoData(valObj)[idx3]
         ordIntensTst <- exprs(valObj)[index,]
-        exprs(valObj) <- ordIntensTst[exemplIndex,]
-        mAPKLObj@exemplTest <- valObj
+        valData <- ExpressionSet(assayData=ordIntensTst[exemplIndex,], phenoData=ordPhenoTst,
+        experimentData=experimentData(valObj), annotation=annotation(valObj))
+        # exprs(valObj) <- ordIntensTst[exemplIndex,]
+        mAPKLObj@exemplTest <- valData
 
     }
 
