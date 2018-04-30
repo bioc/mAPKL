@@ -1,7 +1,7 @@
 Package: mAPKL
 Type: Package
 Title: A Hybrid Feature Selection method for gene expression data
-Version: 1.9.0
+Version: 1.10.0
 Date: 2015-07-21
 Author: Argiris Sakellariou
 Maintainer: Argiris Sakellariou <argisake@gmail.com>
