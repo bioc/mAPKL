@@ -1,0 +1,19 @@
+Package: mAPKL
+Type: Package
+Title: A Hybrid Feature Selection method for gene expression data
+Version: 1.5.2
+Date: 2015-07-21
+Author: Argiris Sakellariou
+Maintainer: Argiris Sakellariou <argisake@gmail.com>
+Depends: R (>= 3.6.0), Biobase
+Imports: multtest, clusterSim, apcluster, limma, e1071, AnnotationDbi,
+        methods, parmigene,igraph,reactome.db
+Suggests: BiocStyle, knitr, mAPKLData, hgu133plus2.db, RUnit,
+        BiocGenerics
+VignetteBuilder: knitr
+Description: We propose a hybrid FS method (mAP-KL), which combines multiple hypothesis testing and affinity propagation (AP)-clustering algorithm along with the Krzanowski & Lai cluster quality index, to select a small yet informative subset of genes.
+License: GPL (>= 2)
+biocViews: FeatureExtraction, DifferentialExpression, Microarray,
+        GeneExpression
+Packaged: 2016-08-03 01:43:55 UTC; biocbuild
+NeedsCompilation: no

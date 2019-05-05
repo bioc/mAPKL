@@ -1,0 +1,26 @@
+import("multtest", "clusterSim", "apcluster", "methods")
+
+importFrom("Biobase", "ExpressionSet", "exprs","pData", "sampleNames", "phenoData", "experimentData", "featureNames", "exprs<-", "annotation", "assayData")
+
+importFrom("limma", "normalizeBetweenArrays")
+
+importFrom("e1071", "tune.svm","tune.control","svm")
+
+importFrom("AnnotationDbi", "select", "mget")
+
+importFrom("parmigene", "knnmi.all", "clr", "aracne.a", "aracne.m")
+
+importFrom("reactome.db", "reactomeEXTID2PATHID", "reactomePATHID2NAME")
+
+importFrom("igraph", "graph.adjacency", "get.edgelist", "E", "degree", "graph.strength", "closeness", "betweenness", "transitivity")
+
+exportClasses("mAPKLRes", "DataLD", "Classify","Annot","NetAttr")
+exportPattern("^[[:alpha:]]+")
+
+importFrom("grDevices", "dev.off", "jpeg")
+
+importFrom("graphics", "par")
+
+importFrom("stats", "density", "predict")
+
+importFrom("utils", "read.delim")
