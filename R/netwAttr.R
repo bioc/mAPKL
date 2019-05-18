@@ -63,4 +63,5 @@ function(mAPKLObj, net="clr") {
             WtransitivityG = WClusteringCoefGlobal
             )
     netObj
+
 }

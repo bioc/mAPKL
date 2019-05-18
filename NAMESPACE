@@ -6,6 +6,7 @@ importFrom("limma", "normalizeBetweenArrays")
 
 importFrom("e1071", "tune.svm","tune.control","svm")
 
+<<<<<<< HEAD
 importFrom("AnnotationDbi", "select", "mget", "mapIds")
 
 importFrom("parmigene", "knnmi.all", "clr", "aracne.a", "aracne.m")

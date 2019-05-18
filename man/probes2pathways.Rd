@@ -43,3 +43,4 @@ probes2pathways(gene.info)
 }
 
 \keyword{ methods }
+
