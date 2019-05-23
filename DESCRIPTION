@@ -1,11 +1,11 @@
 Package: mAPKL
 Type: Package
 Title: A Hybrid Feature Selection method for gene expression data
-Version: 1.14.0
-Date: 2015-07-21
+Version: 1.15.1
+Date: 2019-05-07
 Author: Argiris Sakellariou
 Maintainer: Argiris Sakellariou <argisake@gmail.com>
-Depends: R (>= 3.2.0), Biobase
+Depends: R (>= 3.6.0), Biobase
 Imports: multtest, clusterSim, apcluster, limma, e1071, AnnotationDbi,
         methods, parmigene,igraph,reactome.db
 Suggests: BiocStyle, knitr, mAPKLData, hgu133plus2.db, RUnit,
