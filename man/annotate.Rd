@@ -27,7 +27,6 @@ as described in the gene chip annotation file. The returned information are
 ussually multiple to the number of probe ids (one to many relationship) and are 
 stored in the {results}. In the rest items only the first of the returned 
 values are stored.
-
 }
 \value{
     \item{results}{
