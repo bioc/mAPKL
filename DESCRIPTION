@@ -1,7 +1,7 @@
 Package: mAPKL
 Type: Package
 Title: A Hybrid Feature Selection method for gene expression data
-Version: 1.15.1
+Version: 1.14.1
 Date: 2019-05-07
 Author: Argiris Sakellariou
 Maintainer: Argiris Sakellariou <argisake@gmail.com>
@@ -17,3 +17,4 @@ biocViews: FeatureExtraction, DifferentialExpression, Microarray,
         GeneExpression
 Packaged: 2016-08-03 01:43:55 UTC; biocbuild
 NeedsCompilation: no
+
