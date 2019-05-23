@@ -70,3 +70,4 @@ valExemplObj=out.clL2@exemplTest)
 }
 
 \keyword{ classif }
+

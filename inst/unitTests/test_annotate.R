@@ -33,3 +33,4 @@ checkTrue(genes >= exemplrs)
 checkTrue(!anyNA(gene.info@probe))
 checkEqualsNumeric(5, columns, 0)
 }
+
