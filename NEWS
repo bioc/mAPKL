@@ -7,5 +7,5 @@ Version 1.1.1:
   the "aracne.m" as included in the "parmigene" r-package.
 - I have replaced in the "preprocess" function the type of the produced image from 
   jpeg to tiff format, with resolution=300dpi.
-  Version 1.14.1:
+  Version 1.15.2:
 - Fixed bug. I have modified the annotate.r function because of a failure. Probes with multiple instances (more than 1) in hgu133plus2.db chip package caused failure in unitTests (test_annotate.r)
